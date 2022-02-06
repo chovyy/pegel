@@ -73,7 +73,7 @@ function drawGraph(data) {
 
 function updateChart(chart, data) {
 	chart.data.datasets[0].data = data;
-	chart.update();
+	chart.update('none');
 }
 
 function initSlider($slider, max) {
