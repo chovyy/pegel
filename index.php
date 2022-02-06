@@ -5,6 +5,21 @@
 #range {
     margin: 2em;	
 }
+#range .labels  {
+	display: flex;
+}
+#range .labels div {
+	heigth: 20px;
+	width: 50%;
+	font-family: sans-serif;
+	margin: 0.5em 0;
+}
+#range .labels .left {
+    text-align: left;
+}
+#range .labels .right {
+    text-align: right;
+}
 </style>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
 <script src="//code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
@@ -16,7 +31,13 @@
 <body>
 
 <canvas id="myChart" width="400" height="200"></canvas>
-<div id="range"></div>
+<div id="range">
+	<div class="labels">	
+		<div id="first" class="left"></div>
+		<div id="last" class="right"></div>
+	</div>
+    <div id="slider"></div>
+</div>
 <script>
 
 const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
@@ -33,7 +54,8 @@ $.getJSON(pegelUrl, function (data) {
 	const reduced = reduce(data, MAX_SIZE);
 		console.log('Reduced Count: ' + reduced.length);
 	CHART = drawGraph(reduced);
-	initSlider($('#range'), data.length);
+	initSlider($('#slider'), data.length);
+	updateSliderLabels(data);
 });
 
 function drawGraph(data) {
@@ -101,8 +123,19 @@ function initSlider($slider, max) {
             const slice = DATA.slice(ui.values[0], ui.values[1] + 1);
             const reduced = reduce(slice, MAX_SIZE);
             updateChart(CHART, reduced);
+            updateSliderLabels(slice);
         }
     });
+}
+
+function updateSliderLabels(data) {
+	$('#first').text(formatDate(data[0].timestamp));
+	$('#last').text(formatDate(data[data.length - 1].timestamp));
+}
+
+function formatDate(timestamp) {
+	const date = new Date(timestamp);
+	return moment(date).format('DD.MM.YYYY HH:mm');
 }
 
 function reduce(data, maxSize) {
