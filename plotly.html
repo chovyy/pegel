@@ -65,7 +65,10 @@ function drawGraph(data) {
 		y: data.map(d => d.value) 
 	};
 	Plotly.newPlot(chart, [CHART_DATA], {
-			margin: { t: 0 } 
+			margin: { t: 0 },
+			xaxis: {
+			  nticks: 20
+			}
 		}
 	);
 }
