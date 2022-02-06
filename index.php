@@ -14,9 +14,17 @@
 <pre id="data"></pre>
 <script>
 
+const MAX_SIZE = 1000;
+
 const pegelUrl = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json?start=P15D';
 $.getJSON(pegelUrl, function (data) {
-	const reduced = reduce(data, 10);
+	console.log('Count: ' + data.length);
+	console.log('First: ' + data[0].timestamp);
+	console.log('Last: ' + data[data.length - 1].timestamp);
+	const reduceStep = Math.ceil(data.length / MAX_SIZE);
+	console.log('ReduceStep: ' + reduceStep);
+	const reduced = reduce(data, reduceStep);
+	console.log('Reduced Count: ' + reduced.length);
 	drawGraph(reduced);
 });
 
