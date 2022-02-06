@@ -25,10 +25,11 @@ function drawGraph(data) {
     const myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Red'],
             datasets: [{
                 label: 'Pegel',
                 data: data,
+                cubicInterpolationMode: 'monotone',
+                tension: 0.4,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)'
                 ],
@@ -43,9 +44,17 @@ function drawGraph(data) {
                 xAxisKey: 'timestamp',
                 yAxisKey: 'value'
             },
+            elements: {
+                point:{
+                    radius: 0
+                }
+            },
             scales: {
                 x: {
-                    type: 'timeseries'
+                    type: 'timeseries',
+                    time: {
+                        unit: 'day'
+                    }
                 }
             }
         }
