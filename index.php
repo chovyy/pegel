@@ -30,7 +30,7 @@
 </head>
 <body>
 
-<canvas id="myChart" width="400" height="200"></canvas>
+<canvas id="chart"></canvas>
 <div id="range">
 	<div class="labels">	
 		<div id="first" class="left"></div>
@@ -59,7 +59,7 @@ $.getJSON(pegelUrl, function (data) {
 });
 
 function drawGraph(data) {
-    const ctx = document.getElementById('myChart').getContext('2d');
+    const ctx = document.getElementById('chart').getContext('2d');
     const chart = new Chart(ctx, {
         type: 'line',
         data: {
