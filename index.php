@@ -19,6 +19,7 @@
 <div id="range"></div>
 <script>
 
+const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
 const MAX_SIZE = 1000;
 var DATA;
 var CHART;
@@ -60,9 +61,22 @@ function drawGraph(data) {
             },
             scales: {
                 x: {
-                    type: 'timeseries',
+                    type: 'time',
+                    ticks: {
+                        maxTicksLimit: 30
+                    },
                     time: {
-                        unit: 'day'
+                        displayFormats: {
+                            'millisecond': TIME_FORMAT,
+                            'second': TIME_FORMAT,
+                            'minute': TIME_FORMAT,
+                            'hour': TIME_FORMAT,
+                            'day': TIME_FORMAT,
+                            'week': TIME_FORMAT,
+                            'month': TIME_FORMAT,
+                            'quarter': TIME_FORMAT,
+                            'year': TIME_FORMAT
+                        }
                     }
                 }
             }
@@ -93,14 +107,17 @@ function initSlider($slider, max) {
 
 function reduce(data, maxSize) {
 	const step = Math.ceil(data.length / maxSize);
-	const reduced = [];
-	for (let i = 0; i < data.length; i += step) {
-		reduced.push(data[i]);
+	if (step > 1) {
+        const reduced = [];
+        for (let i = 0; i < data.length; i += step) {
+        	reduced.push(data[i]);
+        }
+        if (reduced[reduced.length - 1].timestamp != data[data.length - 1].timestamp) {
+        	reduced.push(data[data.length - 1]);
+        }
+        return reduced;
 	}
-	if (reduced[reduced.length - 1].timestamp != data[data.length - 1].timestamp) {
-		reduced.push(data[data.length - 1]);
-	}
-	return reduced;
+	return data;
 }
 
 </script>
