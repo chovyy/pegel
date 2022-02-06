@@ -26,6 +26,8 @@ $.getJSON(pegelUrl, function (data) {
 	const reduced = reduce(data, reduceStep);
 	console.log('Reduced Count: ' + reduced.length);
 	drawGraph(reduced);
+	console.log('First: ' + reduced[0].timestamp);
+	console.log('Last: ' + reduced[reduced.length - 1].timestamp);
 });
 
 function drawGraph(data) {
@@ -65,8 +67,11 @@ function drawGraph(data) {
 
 function reduce(data, step) {
 	const reduced = [];
-	for (i = 0; i < data.length; i += step) {
+	for (let i = 0; i < data.length; i += step) {
 		reduced.push(data[i]);
+	}
+	if (reduced[reduced.length - 1].timestamp != data[data.length - 1].timestamp) {
+		reduced.push(data[data.length - 1]);
 	}
 	return reduced;
 }
