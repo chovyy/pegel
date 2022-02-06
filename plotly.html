@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pegel</title>
+<style type="text/css">
+#range {
+    margin: 2em;	
+}
+#range .labels  {
+	display: flex;
+}
+#range .labels div {
+	heigth: 20px;
+	width: 50%;
+	font-family: sans-serif;
+	margin: 0.5em 0;
+}
+#range .labels .left {
+    text-align: left;
+}
+#range .labels .right {
+    text-align: right;
+}
+</style>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<script src="//code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
+<script src="//code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+</head>
+<body>
+
+<div id="chart" style="width:100%;height:800px;"></div>
+<div id="range">
+	<div class="labels">	
+		<div id="first" class="left"></div>
+		<div id="last" class="right"></div>
+	</div>
+    <div id="slider"></div>
+</div>
+<script>
+
+const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
+const MAX_SIZE = 10000;
+var DATA;
+var CHART_DATA;
+
+const pegelUrl = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json?start=P15D';
+$.getJSON(pegelUrl, function (data) {
+	DATA = data;
+		console.log('Count: ' + data.length);
+		console.log('First: ' + data[0].timestamp);
+		console.log('Last: ' + data[data.length - 1].timestamp);
+	const reduced = reduce(data, MAX_SIZE);
+		console.log('Reduced Count: ' + reduced.length);
+	drawGraph(reduced);
+	initSlider($('#slider'), data.length);
+	updateSliderLabels(data);
+});
+
+function drawGraph(data) {
+	const chart = document.getElementById('chart');
+	CHART_DATA = {
+		x: data.map(d => d.timestamp),
+		y: data.map(d => d.value) 
+	};
+	Plotly.newPlot(chart, [CHART_DATA], {
+			margin: { t: 0 } 
+		}
+	);
+}
+
+function updateChart(data) {
+	CHART_DATA.x = data.map(d => d.timestamp);
+	CHART_DATA.y = data.map(d => d.value);
+	Plotly.redraw('chart');
+}
+
+function initSlider($slider, max) {
+    $slider.slider({
+        range: true,
+        min: 0,
+        max: max,
+        values: [ 0, max],
+        stop: function(event, ui) {
+            console.log(ui.values[0] + '-' + ui.values[1]);
+            const slice = DATA.slice(ui.values[0], ui.values[1] + 1);
+            const reduced = reduce(slice, MAX_SIZE);
+            updateChart(reduced);
+            updateSliderLabels(slice);
+        }
+    });
+}
+
+function updateSliderLabels(data) {
+	$('#first').text(formatDate(data[0].timestamp));
+	$('#last').text(formatDate(data[data.length - 1].timestamp));
+}
+
+function formatDate(timestamp) {
+	const date = new Date(timestamp);
+	return moment(date).format('DD.MM.YYYY HH:mm');
+}
+
+function reduce(data, maxSize) {
+	const step = Math.ceil(data.length / maxSize);
+	if (step > 1) {
+        const reduced = [];
+        for (let i = 0; i < data.length; i += step) {
+        	reduced.push(data[i]);
+        }
+        if (reduced[reduced.length - 1].timestamp != data[data.length - 1].timestamp) {
+        	reduced.push(data[data.length - 1]);
+        }
+        return reduced;
+	}
+	return data;
+}
+
+</script>
+
+</body>
+</html>
