@@ -90,7 +90,7 @@ body {
     <input type="radio" id="10min" name="step" value="10">
     <label for="10min">10 Minuten</label> 
   </fieldset>
-  <div>Anzahl Punkte: <span id="count"></span></div>
+  <div>Angezeigte Punkte: <span id="count"></span>/<span id="total"></span></div>
 </div>
 
 <canvas id="chart"></canvas>
@@ -118,12 +118,8 @@ $(document).ready(function () {
 	
 	$.getJSON(PEGEL_URL, function (data) {
 		DATA = data;
-			console.log('Count: ' + data.length);
-			console.log('First: ' + data[0].timestamp);
-			console.log('Last: ' + data[data.length - 1].timestamp);
-			console.log('Step Size: ' + STEP_SIZE);
+		$('#total').text(data.length);
 		const reduced = reduce(data, STEP_SIZE);
-			console.log('Reduced Count: ' + reduced.length);
 		updateCount(reduced);
 		CHART = drawGraph(reduced);
 		RANGE_END = data.length - 1;
@@ -133,7 +129,7 @@ $(document).ready(function () {
 	
 	$('input[name=step]').change(function () {
 		STEP_SIZE = parseInt($(this).val());
-		console.log("step changed: " + STEP_SIZE);
+		console.log("Step changed: " + STEP_SIZE);
 		updateAll();
 	});
 });
@@ -199,9 +195,9 @@ function initSlider($slider) {
         max: RANGE_END,
         values: [ 0, RANGE_END ],
         stop: function(event, ui) {
-            console.log(ui.values[0] + '-' + ui.values[1]);
             RANGE_START = ui.values[0];
             RANGE_END = ui.values[1];
+            console.log("Range changed: " + RANGE_START + '-' + RANGE_END);
             updateAll();
         }
     });
