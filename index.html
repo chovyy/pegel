@@ -107,13 +107,15 @@ body {
 
 const PEGEL_URL = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json';
 const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
-var STEP_SIZE = parseInt($('#steps input:checked').val());
+var STEP_SIZE;
 var RANGE_START = 0;
 var RANGE_END;
 var DATA;
 var CHART;
 
 $(document).ready(function () {
+	STEP_SIZE = parseInt($('input[name=step]:checked').val())
+	
 	$.getJSON(PEGEL_URL, function (data) {
 		DATA = data;
 			console.log('Count: ' + data.length);
