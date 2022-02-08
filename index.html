@@ -3,6 +3,9 @@
 <head>
 <title>Pegel</title>
 <style type="text/css">
+body {
+	font-family: sans-serif;
+}
 #nav {
 	display: flex;
 }
@@ -12,7 +15,6 @@
 	border-style: solid;
 	border-width: 0 1px 1px 1px;
 	background-color: #eee;
-	font-family: sans-serif;
 	text-align: center;
 	font-size: 20px;
 }
@@ -33,7 +35,7 @@
 	color: white;
 }
 
-#range {
+#range, #source, #doku {
     margin: 2em;	
 }
 #range .labels  {
@@ -42,7 +44,6 @@
 #range .labels div {
 	heigth: 20px;
 	width: 50%;
-	font-family: sans-serif;
 	margin: 0.5em 0;
 }
 #range .labels .left {
@@ -78,15 +79,17 @@
 	</div>
     <div id="slider"></div>
 </div>
+<div id="doku">Doku: <a href="https://www.chartjs.org/">https://www.chartjs.org</a></div>
+<div id="source">Datenquelle: <a href="https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json">https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json</a></div>
 <script>
 
+const PEGEL_URL = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json';
 const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
 const MAX_SIZE = 1000;
 var DATA;
 var CHART;
 
-const pegelUrl = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json?start=P15D';
-$.getJSON(pegelUrl, function (data) {
+$.getJSON(PEGEL_URL, function (data) {
 	DATA = data;
 		console.log('Count: ' + data.length);
 		console.log('First: ' + data[0].timestamp);
