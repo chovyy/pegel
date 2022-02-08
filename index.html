@@ -35,7 +35,12 @@ body {
 	color: white;
 }
 
-#range, #source, #doku {
+#steps fieldset, #steps div {
+	text-align: center;
+	border: none;
+}
+
+#steps, #range, #source, #doku {
     margin: 2em;	
 }
 #range .labels  {
@@ -71,6 +76,23 @@ body {
 	<div></div>
 </div>
 
+<div id="steps">
+  <fieldset>
+	Datenpunktabstand:
+    <input type="radio" id="1min" name="step" value="1">
+    <label for="1min">1 Minute</label> 
+    <input type="radio" id="2min" name="step" value="2">
+    <label for="2min">2 Minuten</label> 
+    <input type="radio" id="3min" name="step" value="3" checked="checked">
+    <label for="3min">3 Minuten</label> 
+    <input type="radio" id="5min" name="step" value="5">
+    <label for="5min">5 Minuten</label> 
+    <input type="radio" id="10min" name="step" value="10">
+    <label for="10min">10 Minuten</label> 
+  </fieldset>
+  <div>Anzahl Punkte: <span id="count"></span></div>
+</div>
+
 <canvas id="chart"></canvas>
 <div id="range">
 	<div class="labels">	
@@ -85,20 +107,33 @@ body {
 
 const PEGEL_URL = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json';
 const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
-const MAX_SIZE = 1000;
+var STEP_SIZE = parseInt($('#steps input:checked').val());
+var RANGE_START = 0;
+var RANGE_END;
 var DATA;
 var CHART;
 
-$.getJSON(PEGEL_URL, function (data) {
-	DATA = data;
-		console.log('Count: ' + data.length);
-		console.log('First: ' + data[0].timestamp);
-		console.log('Last: ' + data[data.length - 1].timestamp);
-	const reduced = reduce(data, MAX_SIZE);
-		console.log('Reduced Count: ' + reduced.length);
-	CHART = drawGraph(reduced);
-	initSlider($('#slider'), data.length);
-	updateSliderLabels(data);
+$(document).ready(function () {
+	$.getJSON(PEGEL_URL, function (data) {
+		DATA = data;
+			console.log('Count: ' + data.length);
+			console.log('First: ' + data[0].timestamp);
+			console.log('Last: ' + data[data.length - 1].timestamp);
+			console.log('Step Size: ' + STEP_SIZE);
+		const reduced = reduce(data, STEP_SIZE);
+			console.log('Reduced Count: ' + reduced.length);
+		updateCount(reduced);
+		CHART = drawGraph(reduced);
+		RANGE_END = data.length - 1;
+		initSlider($('#slider'));
+		updateSliderLabels(data);
+	});
+	
+	$('input[name=step]').change(function () {
+		STEP_SIZE = parseInt($(this).val());
+		console.log("step changed: " + STEP_SIZE);
+		updateAll();
+	});
 });
 
 function drawGraph(data) {
@@ -155,20 +190,31 @@ function updateChart(chart, data) {
 	chart.update('none');
 }
 
-function initSlider($slider, max) {
+function initSlider($slider) {
     $slider.slider({
         range: true,
         min: 0,
-        max: max,
-        values: [ 0, max],
+        max: RANGE_END,
+        values: [ 0, RANGE_END ],
         stop: function(event, ui) {
             console.log(ui.values[0] + '-' + ui.values[1]);
-            const slice = DATA.slice(ui.values[0], ui.values[1] + 1);
-            const reduced = reduce(slice, MAX_SIZE);
-            updateChart(CHART, reduced);
-            updateSliderLabels(slice);
+            RANGE_START = ui.values[0];
+            RANGE_END = ui.values[1];
+            updateAll();
         }
     });
+}
+
+function updateAll() {
+    const slice = DATA.slice(RANGE_START, RANGE_END);
+    const reduced = reduce(slice, STEP_SIZE);
+    updateCount(reduced);
+    updateChart(CHART, reduced);
+    updateSliderLabels(slice);
+}
+
+function updateCount(data) {
+	$('#count').text(data.length);
 }
 
 function updateSliderLabels(data) {
@@ -181,8 +227,7 @@ function formatDate(timestamp) {
 	return moment(date).format('DD.MM.YYYY HH:mm');
 }
 
-function reduce(data, maxSize) {
-	const step = Math.ceil(data.length / maxSize);
+function reduce(data, step) {
 	if (step > 1) {
         const reduced = [];
         for (let i = 0; i < data.length; i += step) {
