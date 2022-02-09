@@ -38,6 +38,12 @@ body {
 #steps, #range, #source, #doku {
     margin: 2em;	
 }
+
+#chart {
+	width: 100%;
+	height: 600px;
+}
+
 #range .labels  {
 	display: flex;
 }
