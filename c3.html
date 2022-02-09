@@ -6,16 +6,17 @@
 <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
 <script src="//code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="//code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-<script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>	
+<script src="//cdn.jsdelivr.net/npm/chart.js@^3/dist/chart.min.js" type="text/javascript"></script>	
 <script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@^1"></script>	
 </head>
 <body>
 
 <div id="nav">
 	<div><a href="index.html">Chart.js</a></div>
-	<div class="active"><a href="plotly.html">Plotly</a></div>
+	<div><a href="plotly.html">Plotly</a></div><div></div>
 	<div><a href="dygraphs.html">dygraphs</a></div>
-	<div><a href="c3.html">C3</a></div>
+	<div class="active"><a href="c3.html">C3</a></div>
 	<div></div>
 	<div></div>
 </div>
@@ -37,7 +38,7 @@
   <div>Angezeigte Punkte: <span id="count"></span>/<span id="total"></span></div>
 </div>
 
-<div id="chart" style="width:100%;height:800px;"></div>
+<canvas id="chart"></canvas>
 <div id="range">
 	<div class="labels">	
 		<div id="first" class="left"></div>
@@ -45,7 +46,7 @@
 	</div>
     <div id="slider"></div>
 </div>
-<div id="doku">Doku: <a href="https://plotly.com/javascript">https://plotly.com/javascript</a></div>
+<div id="doku">Doku: <a href="https://www.chartjs.org/">https://www.chartjs.org</a></div>
 <div id="source">Datenquelle: <a href="https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json">https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json</a></div>
 <script>
 
@@ -55,7 +56,7 @@ var RANGE_START = 0;
 var RANGE_END;
 var STEP_SIZE;
 var DATA;
-var CHART_DATA;
+var CHART;
 
 $(document).ready(function () {
 	STEP_SIZE = parseInt($('input[name=step]:checked').val())
@@ -65,7 +66,7 @@ $(document).ready(function () {
 		$('#total').text(data.length);
 		const reduced = reduce(data, STEP_SIZE);
 		updateCount(reduced);
-		drawGraph(reduced);
+		CHART = drawGraph(reduced);
 		RANGE_END = data.length - 1;
 		initSlider($('#slider'));
 		updateSliderLabels(data);
@@ -79,24 +80,57 @@ $(document).ready(function () {
 });
 
 function drawGraph(data) {
-	const div = document.getElementById('chart');
-	CHART_DATA = {
-		x: data.map(d => d.timestamp),
-		y: data.map(d => d.value) 
-	};
-	Plotly.newPlot(div, [CHART_DATA], {
-			margin: { t: 0 },
-			xaxis: {
-			  nticks: 20
-			}
-		}
-	);
+    const ctx = document.getElementById('chart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Pegel',
+                data: data,
+                cubicInterpolationMode: 'monotone',
+                tension: 0.4,
+                borderColor: [ 'red' ]
+            }]
+        },
+        options: {
+        	parsing: {
+                xAxisKey: 'timestamp',
+                yAxisKey: 'value'
+            },
+            elements: {
+                point:{
+                    radius: 0
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    ticks: {
+                        maxTicksLimit: 30
+                    },
+                    time: {
+                        displayFormats: {
+                            'millisecond': TIME_FORMAT,
+                            'second': TIME_FORMAT,
+                            'minute': TIME_FORMAT,
+                            'hour': TIME_FORMAT,
+                            'day': TIME_FORMAT,
+                            'week': TIME_FORMAT,
+                            'month': TIME_FORMAT,
+                            'quarter': TIME_FORMAT,
+                            'year': TIME_FORMAT
+                        }
+                    }
+                }
+            }
+        }
+    });
+    return chart;
 }
 
-function updateChart(data) {
-	CHART_DATA.x = data.map(d => d.timestamp);
-	CHART_DATA.y = data.map(d => d.value);
-	Plotly.redraw('chart');
+function updateChart(chart, data) {
+	chart.data.datasets[0].data = data;
+	chart.update('none');
 }
 
 function initSlider($slider) {
@@ -118,7 +152,7 @@ function updateAll() {
     const slice = DATA.slice(RANGE_START, RANGE_END);
     const reduced = reduce(slice, STEP_SIZE);
     updateCount(reduced);
-    updateChart(reduced);
+    updateChart(CHART, reduced);
     updateSliderLabels(slice);
 }
 
