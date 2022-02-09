@@ -79,12 +79,12 @@ $(document).ready(function () {
 });
 
 function drawGraph(data) {
-	const chart = document.getElementById('chart');
+	const div = document.getElementById('chart');
 	CHART_DATA = {
 		x: data.map(d => d.timestamp),
 		y: data.map(d => d.value) 
 	};
-	Plotly.newPlot(chart, [CHART_DATA], {
+	Plotly.newPlot(div, [CHART_DATA], {
 			margin: { t: 0 },
 			xaxis: {
 			  nticks: 20
