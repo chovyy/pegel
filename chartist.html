@@ -2,22 +2,29 @@
 <html>
 <head>
 <title>Pegel</title>
-<link rel="stylesheet" href="pegel.css">
-<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<link href="pegel.css" rel="stylesheet">
+<link href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css" rel="stylesheet">
 <script src="//code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="//code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-<script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>	
-<script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+<script src="//cdn.jsdelivr.net/npm/moment@^2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<style>
+.c3-line {
+    stroke-width: 2px;
+}
+</style>
 </head>
 <body>
 
 <div id="nav">
 	<div><a href="index.html">Chart.js</a></div>
-	<div class="active"><a href="plotly.html">Plotly</a></div>
+	<div><a href="plotly.html">Plotly</a></div>
 	<div><a href="dygraphs.html">dygraphs</a></div>
-	<div><a href="c3.html">C3</a></div>
+	<div><a href="c3.html">C3.js</a></div>
 	<div><a href="apex.html">Apexcharts</a></div>
-	<div><a href="chartist.html">Chartist.js</a></div>
+	<div class="active"><a href="chartist.html">Chartist.js</a></div>
 </div>
 
 <div id="steps">
@@ -45,7 +52,7 @@
 	</div>
     <div id="slider"></div>
 </div>
-<div id="doku">Doku: <a href="https://plotly.com/javascript">https://plotly.com/javascript</a></div>
+<div id="doku">Doku: <a href="https://gionkunz.github.io/chartist-js/">https://gionkunz.github.io/chartist-js</a></div>
 <div id="source">Datenquelle: <a href="https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json">https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json</a></div>
 <script>
 
@@ -55,7 +62,7 @@ var RANGE_START = 0;
 var RANGE_END;
 var STEP_SIZE;
 var DATA;
-var CHART_DATA;
+var CHART;
 
 $(document).ready(function () {
 	STEP_SIZE = parseInt($('input[name=step]:checked').val())
@@ -65,7 +72,7 @@ $(document).ready(function () {
 		$('#total').text(data.length);
 		const reduced = reduce(data, STEP_SIZE);
 		updateCount(reduced);
-		drawGraph(reduced);
+		CHART = drawGraph(reduced);
 		RANGE_END = data.length - 1;
 		initSlider($('#slider'));
 		updateSliderLabels(data);
@@ -79,24 +86,51 @@ $(document).ready(function () {
 });
 
 function drawGraph(data) {
-	const div = document.getElementById('chart');
-	CHART_DATA = {
-		x: data.map(d => d.timestamp),
-		y: data.map(d => d.value) 
-	};
-	Plotly.newPlot(div, [CHART_DATA], {
-			margin: { t: 0 },
-			xaxis: {
-			  nticks: 20
-			}
+	const chartData = data.map(d => { 
+		return {
+			x: d.timestamp, 
+			y: d.value
 		}
-	);
+	});
+	
+	var options = {
+          series: [{
+	          name: 'Pegel',
+	          data: chartData
+       	  }],
+          chart: {
+          type: 'line',
+          height: 600,
+        },
+        dataLabels: {
+          enabled: false
+        },
+        markers: {
+          size: 0,
+        },
+        stroke: {
+        	width: 2,	
+        },
+        xaxis: {
+          type: 'datetime',
+        },
+    };
+
+    const chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
+    return chart;
 }
 
-function updateChart(data) {
-	CHART_DATA.x = data.map(d => d.timestamp);
-	CHART_DATA.y = data.map(d => d.value);
-	Plotly.redraw('chart');
+function updateChart(chart, data) {
+	const chartData = data.map(d => { 
+		return {
+			x: d.timestamp, 
+			y: d.value
+		}
+	});
+	chart.updateSeries([{
+		data: chartData
+	}]);
 }
 
 function initSlider($slider) {
@@ -118,7 +152,7 @@ function updateAll() {
     const slice = DATA.slice(RANGE_START, RANGE_END);
     const reduced = reduce(slice, STEP_SIZE);
     updateCount(reduced);
-    updateChart(reduced);
+    updateChart(CHART, reduced);
     updateSliderLabels(slice);
 }
 
