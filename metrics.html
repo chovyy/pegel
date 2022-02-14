@@ -69,7 +69,7 @@ $(document).ready(function () {
 		$('#total').text(data.length);
 		const reduced = reduce(data, STEP_SIZE);
 		updateCount(reduced);
-		CHART = drawGraph(reduced);
+		CHART = drawChart(reduced);
 		RANGE_END = data.length - 1;
 		initSlider($('#slider'));
 		updateSliderLabels(data);
@@ -82,7 +82,7 @@ $(document).ready(function () {
 	});
 });
 
-function drawGraph(data) {
+function drawChart(data) {
 	const chartData = data.map(d => { 
 		return {
 			x: new Date(d.timestamp), 
@@ -103,7 +103,7 @@ function drawGraph(data) {
 }
 
 function updateChart(data) {
-	drawGraph(data);
+	drawChart(data);
 }
 
 function initSlider($slider) {
