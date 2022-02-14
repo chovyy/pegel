@@ -81,13 +81,17 @@ $(document).ready(function () {
 
 function drawChart(data) {
 	const div = document.getElementById('chart');
-	const chartData = data.map(d => [new Date(d.timestamp), d.value]); 
+	const chartData = convertData(data);
 	return new Dygraph(div, chartData);
 }
 
 function updateChart(data) {
-	const chartData = data.map(d => [new Date(d.timestamp), d.value]); 
+	const chartData = convertData(data);
 	CHART.updateOptions( { 'file': chartData } );
+}
+
+function convertData(data) {
+	return data.map(d => [new Date(d.timestamp), d.value]);
 }
 
 function initSlider($slider) {

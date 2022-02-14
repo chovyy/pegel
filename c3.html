@@ -88,10 +88,7 @@ $(document).ready(function () {
 });
 
 function drawChart(data) {
-	const chartData = [
-			['x'].concat(data.map(d => new Date(d.timestamp))),
-			['Pegel'].concat(data.map(d => d.value)) 
-	];
+	const chartData = convertData(data);
     const chart = c3.generate({
         bindto: '#chart',
         data: {
@@ -118,13 +115,17 @@ function drawChart(data) {
 }
 
 function updateChart(chart, data) {
-	const chartData = [
-		['x'].concat(data.map(d => new Date(d.timestamp))),
-		['Pegel'].concat(data.map(d => d.value)) 
-	];
+	const chartData = convertData(data);
 	chart.load({
 		columns: chartData
 	});
+}
+
+function convertData(data) {
+	return [
+		['x'].concat(data.map(d => new Date(d.timestamp))),
+		['Pegel'].concat(data.map(d => d.value)) 
+	];
 }
 
 function initSlider($slider) {

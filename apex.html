@@ -81,14 +81,8 @@ $(document).ready(function () {
 });
 
 function drawChart(data) {
-	const chartData = data.map(d => { 
-		return {
-			x: d.timestamp, 
-			y: d.value
-		}
-	});
-	
-	var options = {
+	const chartData = convertData(data);
+	const options = {
           series: [{
 	          name: 'Pegel',
 	          data: chartData
@@ -117,15 +111,19 @@ function drawChart(data) {
 }
 
 function updateChart(chart, data) {
-	const chartData = data.map(d => { 
+	const chartData = convertData(data);
+	chart.updateSeries([{
+		data: chartData
+	}]);
+}
+
+function convertData(data) {
+	return data.map(d => { 
 		return {
 			x: d.timestamp, 
 			y: d.value
 		}
 	});
-	chart.updateSeries([{
-		data: chartData
-	}]);
 }
 
 function initSlider($slider) {
