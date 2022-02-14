@@ -8,13 +8,10 @@
 <script src="//code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
 <script src="//cdn.jsdelivr.net/npm/moment@^2"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+<script src="//cdn.jsdelivr.net/npm/chartist@0.11.4/dist/chartist.js"></script>
+<script src="//gionkunz.github.io/chartist-js/scripts/all.js"></script>
 
-<style>
-.c3-line {
-    stroke-width: 2px;
-}
-</style>
 </head>
 <body>
 
@@ -24,7 +21,7 @@
 	<div><a href="dygraphs.html">dygraphs</a></div>
 	<div><a href="c3.html">C3.js</a></div>
 	<div><a href="apex.html">Apexcharts</a></div>
-	<div class="active"><a href="chartist.html">Chartist.js</a></div>
+	<div class="active"><a href="metrics.html">MetricsGraphics.js</a></div>
 </div>
 
 <div id="steps">
@@ -86,39 +83,19 @@ $(document).ready(function () {
 });
 
 function drawGraph(data) {
-	const chartData = data.map(d => { 
-		return {
-			x: d.timestamp, 
-			y: d.value
-		}
-	});
+	const chartData = {
+		series: [data.map(d => d.value)]
+	};
+	const options = {
+		showPoint: false,
+		axisX: {
+			showGrid: false,
+			type: Chartist.StepAxis,
+			ticks: ['One', 'Two', 'Three']
+		},
+	}
 	
-	var options = {
-          series: [{
-	          name: 'Pegel',
-	          data: chartData
-       	  }],
-          chart: {
-          type: 'line',
-          height: 600,
-        },
-        dataLabels: {
-          enabled: false
-        },
-        markers: {
-          size: 0,
-        },
-        stroke: {
-        	width: 2,	
-        },
-        xaxis: {
-          type: 'datetime',
-        },
-    };
-
-    const chart = new ApexCharts(document.querySelector("#chart"), options);
-    chart.render();
-    return chart;
+	return new Chartist.Line('#chart', chartData, options);
 }
 
 function updateChart(chart, data) {
