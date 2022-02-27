@@ -60,7 +60,6 @@ var DATA;
 var CHART;
 
 $(document).ready(function () {
-	
 	$.getJSON(PEGEL_URL, function (data) {
 		DATA = data;
 		$('#total').text(data.length);

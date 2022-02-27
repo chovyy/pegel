@@ -36,7 +36,7 @@
     <label for="1min">1 Minute</label> 
     <input type="radio" id="2min" name="step" value="2">
     <label for="2min">2 Minuten</label> 
-    <input type="radio" id="3min" name="step" value="3" checked="checked">
+    <input type="radio" id="3min" name="step" value="3">
     <label for="3min">3 Minuten</label> 
     <input type="radio" id="5min" name="step" value="5">
     <label for="5min">5 Minuten</label> 
@@ -60,6 +60,7 @@
 
 const PEGEL_URL = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json';
 const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
+const DEFAULT_STEP = 3;
 var RANGE_START = 0;
 var RANGE_END;
 var STEP_SIZE;
@@ -67,11 +68,11 @@ var DATA;
 var CHART;
 
 $(document).ready(function () {
-	STEP_SIZE = parseInt($('input[name=step]:checked').val())
-	
 	$.getJSON(PEGEL_URL, function (data) {
 		DATA = data;
 		$('#total').text(data.length);
+		switchSteps();
+		STEP_SIZE = parseInt($('input[name=step]:checked').val());
 		const reduced = reduce(data, STEP_SIZE);
 		updateCount(reduced);
 		CHART = drawChart(reduced);
@@ -81,11 +82,22 @@ $(document).ready(function () {
 	});
 	
 	$('input[name=step]').change(function () {
-		STEP_SIZE = parseInt($(this).val());
-		console.log("Step changed: " + STEP_SIZE);
-		updateAll();
+		const step = parseInt($(this).val());
+		const url = new URL(window.location.href);
+		url.searchParams.set('step', step);
+		window.location.href = url.href;
 	});
 });
+
+function switchSteps() {
+	const options = $('#steps input').map(function () { return $(this).val() }).get();
+	const url = new URL(window.location.href);
+	var step = url.searchParams.get('step');
+	if (!step || !options.includes(step)) {
+		step = DEFAULT_STEP;
+	}
+	$('#' + step + 'min').attr('checked', 'checked');
+}
 
 function drawChart(data) {
 	const chartData = convertData(data);
