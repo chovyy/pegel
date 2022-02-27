@@ -69,11 +69,11 @@ $(document).ready(function () {
 		RANGE_MAX = data.length - 1;
 		RANGE_START = getRangeStart(RANGE_MIN, RANGE_MAX);
 		RANGE_END = getRangeEnd(RANGE_START + 1, RANGE_MAX);
-		initSlider($('#slider'));
 		const reduced = reduce(data, STEP_SIZE, RANGE_START, RANGE_END);
+		initSlider($('#slider'));
+		updateSliderLabels(reduced);
 		updateCount(reduced);
 		CHART = drawChart(reduced);
-		updateSliderLabels(data);
 	});
 	
 	$('input[name=step]').change(function () {
