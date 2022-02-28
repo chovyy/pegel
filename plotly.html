@@ -49,8 +49,8 @@
 </div>
 <div id="doku">Chart Library: <a href="https://plotly.com/javascript">https://plotly.com/javascript</a> (MIT License)</div>
 <div id="source">Datenquelle: <a href="https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json">https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json</a></div>
-<script>
 
+<script>
 var CHART_DATA;
 
 function drawChart(data) {
@@ -73,7 +73,6 @@ function updateChart(data) {
 	CHART_DATA.y = data.map(d => d.value);
 	Plotly.redraw('chart');
 }
-
 </script>
 
 </body>

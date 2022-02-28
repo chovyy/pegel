@@ -57,8 +57,8 @@
 </div>
 <div id="doku">Chart Library: <a href="https://c3js.org/">https://c3js.org</a> (MIT License)</div>
 <div id="source">Datenquelle: <a href="https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json">https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json</a></div>
-<script>
 
+<script>
 var CHART;
 
 function drawChart(data) {
@@ -100,7 +100,6 @@ function convertData(data) {
 		['Pegel'].concat(data.map(d => d.value)) 
 	];
 }
-
 </script>
 
 </body>
