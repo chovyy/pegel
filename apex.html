@@ -49,13 +49,16 @@ var CHART;
 function drawChart(data) {
 	const chartData = convertData(data);
 	const options = {
-          series: [{
-	          name: 'Pegel',
-	          data: chartData
-       	  }],
-          chart: {
-          type: 'line',
-          height: 600,
+        series: [{
+	        name: 'Pegel',
+	        data: chartData
+       	}],
+        chart: {
+          	type: 'line',
+          	height: 600,
+          	animations: {
+            	enabled: false
+			}
         },
         dataLabels: {
           enabled: false
