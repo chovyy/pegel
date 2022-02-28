@@ -27,6 +27,8 @@ $(document).ready(function () {
 	
 	STEP_SIZE = switchSteps();
 	
+	$('#source').append(`<a href="${PEGEL_URL}">${PEGEL_URL}</a>`);
+	
 	$.getJSON(PEGEL_URL, function (data) {
 		DATA = data;
 		$('#total').text(data.length);
