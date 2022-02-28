@@ -1,5 +1,6 @@
 const PEGEL_URL = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json';
 const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
+const STEPS = [1, 2, 3, 5, 10];
 const DEFAULT_STEP = 3;
 const RANGE_MIN = 0;
 var RANGE_MAX;
@@ -9,10 +10,26 @@ var STEP_SIZE;
 var DATA;
 
 $(document).ready(function () {
+	STEPS.forEach(step => {
+		const n = step != 1 ? 'n' : ''; 
+		$('#steps fieldset').append(`<input type="radio" id="${step}min" name="step" value="${step}">`);
+		$('#steps fieldset').append(`<label for="${step}min">${step} Minute${n}</label>`);
+	});
+
+	$('input[name=step]').change(function () {
+		const step = parseInt($(this).val());
+		const url = new URL(window.location.href);
+		url.searchParams.set('step', step);
+		url.searchParams.set('rangeStart', RANGE_START);
+		url.searchParams.set('rangeEnd', RANGE_END);
+		window.location.href = url.href;
+	});
+	
+	STEP_SIZE = switchSteps();
+	
 	$.getJSON(PEGEL_URL, function (data) {
 		DATA = data;
 		$('#total').text(data.length);
-		STEP_SIZE = switchSteps();
 		RANGE_MAX = data.length - 1;
 		RANGE_START = getRangeStart(RANGE_MIN, RANGE_MAX);
 		RANGE_END = getRangeEnd(RANGE_START + 1, RANGE_MAX);
@@ -21,15 +38,6 @@ $(document).ready(function () {
 		updateSliderLabels(reduced);
 		updateCount(reduced);
 		drawChart(reduced);
-	});
-	
-	$('input[name=step]').change(function () {
-		const step = parseInt($(this).val());
-		const url = new URL(window.location.href);
-		url.searchParams.set('step', step);
-		url.searchParams.set('rangeStart', RANGE_START);
-		url.searchParams.set('rangeEnd', RANGE_END);
-		window.location.href = url.href;
 	});
 });
 window.onpopstate = function() {
