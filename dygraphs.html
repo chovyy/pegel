@@ -7,8 +7,10 @@
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css" />
 <script src="//code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
 <script src="//code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@^2"></script>
+<script src="pegel.js"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
 </head>
 <body>
 
@@ -50,51 +52,12 @@
 <div id="source">Datenquelle: <a href="https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json">https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json</a></div>
 <script>
 
-const PEGEL_URL = 'https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations/HAMBURG%20ST.%20PAULI/W/measurements.json';
-const TIME_FORMAT = 'DD.MM.YYYY HH:mm';
-const DEFAULT_STEP = 3;
-var RANGE_START = 0;
-var RANGE_END;
-var STEP_SIZE;
-var DATA;
 var CHART;
-
-$(document).ready(function () {
-	$.getJSON(PEGEL_URL, function (data) {
-		DATA = data;
-		$('#total').text(data.length);
-		switchSteps();
-		STEP_SIZE = parseInt($('input[name=step]:checked').val());
-		const reduced = reduce(data, STEP_SIZE);
-		updateCount(reduced);
-		CHART = drawChart(reduced);
-		RANGE_END = data.length - 1;
-		initSlider($('#slider'));
-		updateSliderLabels(data);
-	});
-	
-	$('input[name=step]').change(function () {
-		const step = parseInt($(this).val());
-		const url = new URL(window.location.href);
-		url.searchParams.set('step', step);
-		window.location.href = url.href;
-	});
-});
-
-function switchSteps() {
-	const options = $('#steps input').map(function () { return $(this).val() }).get();
-	const url = new URL(window.location.href);
-	var step = url.searchParams.get('step');
-	if (!step || !options.includes(step)) {
-		step = DEFAULT_STEP;
-	}
-	$('#' + step + 'min').attr('checked', 'checked');
-}
 
 function drawChart(data) {
 	const div = document.getElementById('chart');
 	const chartData = convertData(data);
-	return new Dygraph(div, chartData);
+	CHART = new Dygraph(div, chartData);
 }
 
 function updateChart(data) {
@@ -104,57 +67,6 @@ function updateChart(data) {
 
 function convertData(data) {
 	return data.map(d => [new Date(d.timestamp), d.value]);
-}
-
-function initSlider($slider) {
-    $slider.slider({
-        range: true,
-        min: 0,
-        max: RANGE_END,
-        values: [ 0, RANGE_END ],
-        stop: function(event, ui) {
-            RANGE_START = ui.values[0];
-            RANGE_END = ui.values[1];
-            console.log("Range changed: " + RANGE_START + '-' + RANGE_END);
-            updateAll();
-        }
-    });
-}
-
-function updateAll() {
-    const slice = DATA.slice(RANGE_START, RANGE_END);
-    const reduced = reduce(slice, STEP_SIZE);
-    updateCount(reduced);
-    updateChart(reduced);
-    updateSliderLabels(slice);
-}
-
-function updateCount(data) {
-	$('#count').text(data.length);
-}
-
-function updateSliderLabels(data) {
-	$('#first').text(formatDate(data[0].timestamp));
-	$('#last').text(formatDate(data[data.length - 1].timestamp));
-}
-
-function formatDate(timestamp) {
-	const date = new Date(timestamp);
-	return moment(date).format('DD.MM.YYYY HH:mm');
-}
-
-function reduce(data, step) {
-	if (step > 1) {
-        const reduced = [];
-        for (let i = 0; i < data.length; i += step) {
-        	reduced.push(data[i]);
-        }
-        if (reduced[reduced.length - 1].timestamp != data[data.length - 1].timestamp) {
-        	reduced.push(data[data.length - 1]);
-        }
-        return reduced;
-	}
-	return data;
 }
 
 </script>
